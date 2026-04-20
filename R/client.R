@@ -24,15 +24,47 @@ alphainfo_client <- function(api_key, base_url = DEFAULT_BASE_URL, timeout = 150
     list(
       api_key  = api_key,
       base_url = sub("/$", "", base_url),
-      timeout  = as.numeric(timeout)
+      timeout  = as.numeric(timeout),
+      .closed  = FALSE
     ),
     class = "alphainfo_client"
   )
 }
 
+#' Close an alphainfo client
+#'
+#' Marks the client as closed so subsequent calls raise a clear error.
+#' The underlying HTTP stack is \code{httr2}, which opens and closes
+#' sockets per request — there is no persistent connection pool held
+#' by the client object itself, so this is mostly a defensive marker.
+#'
+#' Safe to call more than once. Use \code{on.exit(close_client(client))}
+#' at the top of your function to guarantee cleanup if it errors out.
+#'
+#' @param client An \code{alphainfo_client}.
+#' @return The closed client, invisibly.
+#' @export
+#' @examples
+#' \dontrun{
+#' client <- alphainfo_client(Sys.getenv("ALPHAINFO_API_KEY"))
+#' on.exit(close_client(client))
+#' result <- analyze_signal(client, signal = rnorm(200), sampling_rate = 1000)
+#' }
+close_client <- function(client) {
+  stopifnot(inherits(client, "alphainfo_client"))
+  client$.closed <- TRUE
+  invisible(client)
+}
+
 #' @keywords internal
 build_request <- function(client, path, method = "GET", body = NULL) {
   stopifnot(inherits(client, "alphainfo_client"))
+  if (isTRUE(client$.closed)) {
+    alphainfo_error(
+      "alphainfo_network_error",
+      "client is closed \u2014 reopen with alphainfo_client()"
+    )
+  }
   req <- httr2::request(paste0(client$base_url, path)) |>
     httr2::req_headers(
       `X-API-Key` = client$api_key,

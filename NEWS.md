@@ -1,3 +1,13 @@
+# alphainfo 1.5.11
+
+Connection cleanup improvements.
+
+* New `close_client()` — marks a client as closed so subsequent calls
+  raise a clear error instead of silently succeeding. The R SDK uses
+  `httr2` (no persistent per-client connection pool), so this is
+  mostly a defensive marker, but it lets users write the idiomatic
+  `on.exit(close_client(client))` pattern at the top of functions.
+
 # alphainfo 1.5.10
 
 Initial release — parity with Python SDK 1.5.10.
