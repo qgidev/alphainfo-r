@@ -1,6 +1,7 @@
 export(alphainfo_client)
 export(close_client)
 export(analyze_signal)
+export(analyze_auto)
 export(fingerprint_signal)
 export(analyze_batch)
 export(analyze_matrix)

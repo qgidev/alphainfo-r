@@ -107,11 +107,21 @@ parse_json_body <- function(result) {
 #' @param client An \code{alphainfo_client}.
 #' @param signal Numeric vector (min 10 samples).
 #' @param sampling_rate Sampling rate in Hz.
-#' @param domain Analysis domain (default \code{"generic"}).
+#' @param domain Analysis domain. Defaults to \code{"generic"} (safe
+#'   universal calibration). Pass \code{"auto"} to have the server infer
+#'   the calibration from the signal — then inspect
+#'   \code{result$domain_applied} and \code{result$domain_inference}. Or
+#'   pass a specific name (\code{"biomedical"}, \code{"finance"}, ...).
+#'   Aliases (\code{"fintech"}, \code{"biomed"}, ...) resolve server-side;
+#'   real typos receive HTTP 400 with a "Did you mean ...?" suggestion.
 #' @param baseline Optional reference signal.
 #' @param include_semantic Include the semantic interpretation layer.
 #' @param use_multiscale Enable multi-scale analysis (default TRUE server-side).
-#' @return A list with structural_score, confidence_band, metrics, etc.
+#' @return A named list. Guaranteed fields: structural_score, change_detected,
+#'   change_score, confidence_band, engine_version, analysis_id,
+#'   \code{domain_applied} (server 1.5.12+). When \code{domain = "auto"} the
+#'   list also contains \code{domain_inference} with \code{inferred},
+#'   \code{confidence}, \code{fallback_used}, \code{reasoning}.
 #' @export
 analyze_signal <- function(client, signal, sampling_rate, domain = "generic",
                            baseline = NULL, include_semantic = NULL, use_multiscale = NULL) {
@@ -124,6 +134,32 @@ analyze_signal <- function(client, signal, sampling_rate, domain = "generic",
   if (!is.null(include_semantic)) body$include_semantic <- isTRUE(include_semantic)
   if (!is.null(use_multiscale)) body$use_multiscale <- isTRUE(use_multiscale)
   parse_json_body(perform(build_request(client, "/v1/analyze/stream", "POST", body)))
+}
+
+#' Analyze a signal with automatic domain inference
+#'
+#' Syntactic sugar for \code{analyze_signal(client, signal, sampling_rate,
+#' domain = "auto", ...)}. The server picks the most likely calibration
+#' from cheap signal statistics; check \code{result$domain_inference} for
+#' the confidence and reasoning behind the choice.
+#'
+#' @inheritParams analyze_signal
+#' @return Same shape as \code{analyze_signal}. \code{domain_inference} is
+#'   always populated.
+#' @export
+#' @examples
+#' \dontrun{
+#' client <- alphainfo_client(Sys.getenv("ALPHAINFO_API_KEY"))
+#' result <- analyze_auto(client, rnorm(500), sampling_rate = 250)
+#' result$domain_applied
+#' result$domain_inference$reasoning
+#' }
+analyze_auto <- function(client, signal, sampling_rate,
+                         baseline = NULL, include_semantic = NULL, use_multiscale = NULL) {
+  analyze_signal(client, signal, sampling_rate, domain = "auto",
+                 baseline = baseline,
+                 include_semantic = include_semantic,
+                 use_multiscale = use_multiscale)
 }
 
 #' Extract the 5D structural fingerprint of a signal

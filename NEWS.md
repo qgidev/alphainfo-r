@@ -1,3 +1,22 @@
+# alphainfo 1.5.12
+
+Added automatic domain inference; `domain` now optional with sensible
+default.
+
+* `analyze_signal()` — `domain` argument documented as optional.
+  Pass `"auto"` to have the server infer the calibration from the
+  signal. The returned list now always contains `domain_applied`
+  (server 1.5.12+); when `domain = "auto"` it also contains
+  `domain_inference` with `inferred`, `confidence`, `fallback_used`
+  and `reasoning`.
+* New exported helper `analyze_auto()` — syntactic sugar for
+  `analyze_signal(..., domain = "auto")`.
+* Roxygen comments updated to explain aliases (`"fintech"` →
+  `"finance"`, `"biomed"` → `"biomedical"`, ...) and the server's
+  "Did you mean ...?" suggestion for typos.
+
+Backwards-compatible.
+
 # alphainfo 1.5.11
 
 Connection cleanup improvements.
