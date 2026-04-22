@@ -1,4 +1,9 @@
-# alphainfo 1.5.13
+# alphainfo 1.5.14
+
+Version parity bump. No functional change. Bumped to stay aligned with
+the Python SDK 1.5.14 release (a cosmetic `__version__` attribute fix
+specific to Python). Behaviour is identical to 1.5.13.
+
 
 Response contract refinement and documentation improvements.
 
