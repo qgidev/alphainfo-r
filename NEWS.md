@@ -1,4 +1,15 @@
-# alphainfo 1.5.12
+# alphainfo 1.5.13
+
+Response contract refinement and documentation improvements.
+
+Server response shape has been neutralised — the following keys have new names:
+
+* `metrics$scale_entropy`                            → `metrics$complexity_index`
+* `metrics$multiscale$curvature`                     → `metrics$multiscale$scale_profile`
+* `metrics$multiscale$summary$scale_curvature_score` → `metrics$multiscale$summary$profile_score`
+
+The 5D fingerprint contract is unchanged.
+
 
 Added automatic domain inference; `domain` now optional with sensible
 default.
