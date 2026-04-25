@@ -1,7 +1,7 @@
 Package: alphainfo
 Type: Package
 Title: R Client for the alphainfo.io Structural Intelligence API
-Version: 1.5.19
+Version: 1.5.20
 Authors@R: c(
     person(
       given = "QGI Quantum Systems",
